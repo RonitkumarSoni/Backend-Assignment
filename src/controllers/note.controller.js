@@ -72,7 +72,22 @@ async function createNotesBulk(req, res) {
   }
 }
 
+async function getAllNotes(req, res) {
+  try {
+    const notes = await Note.find().sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      message: "Notes fetched successfully",
+      data: notes,
+    });
+  } catch (error) {
+    return sendErrorResponse(res, 500, "Failed to fetch notes", error);
+  }
+}
+
 module.exports = {
   createNote,
   createNotesBulk,
+  getAllNotes,
 };
