@@ -222,6 +222,38 @@ async function updateNote(req, res) {
   }
 }
 
+async function deleteNote(req, res) {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid note ID",
+        data: null,
+      });
+    }
+
+    const note = await Note.findByIdAndDelete(id);
+
+    if (!note) {
+      return res.status(404).json({
+        success: false,
+        message: "Note not found",
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Note deleted successfully",
+      data: null,
+    });
+  } catch (error) {
+    return sendErrorResponse(res, 500, "Failed to delete note", error);
+  }
+}
+
 module.exports = {
   createNote,
   createNotesBulk,
@@ -229,4 +261,5 @@ module.exports = {
   getNoteById,
   replaceNote,
   updateNote,
+  deleteNote,
 };
