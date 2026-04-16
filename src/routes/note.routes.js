@@ -7,12 +7,14 @@ const {
   replaceNote,
   updateNote,
   deleteNote,
+  deleteNotesBulk,
 } = require("../controllers/note.controller");
 
 const router = express.Router();
 
 router.get("/", getAllNotes);
 router.get("/:id", getNoteById);
+router.delete("/bulk", deleteNotesBulk);
 router.put("/:id", replaceNote);
 router.patch("/:id", updateNote);
 router.delete("/:id", deleteNote);
