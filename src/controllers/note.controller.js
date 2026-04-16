@@ -19,6 +19,10 @@ function sendErrorResponse(res, statusCode, message, error) {
   });
 }
 
+function isValidObjectId(id) {
+  return mongoose.Types.ObjectId.isValid(id);
+}
+
 async function createNote(req, res) {
   try {
     const { title, content, category, isPinned } = req.body;
@@ -86,8 +90,41 @@ async function getAllNotes(req, res) {
   }
 }
 
+async function getNoteById(req, res) {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid note ID",
+        data: null,
+      });
+    }
+
+    const note = await Note.findById(id);
+
+    if (!note) {
+      return res.status(404).json({
+        success: false,
+        message: "Note not found",
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Note fetched successfully",
+      data: note,
+    });
+  } catch (error) {
+    return sendErrorResponse(res, 500, "Failed to fetch note", error);
+  }
+}
+
 module.exports = {
   createNote,
   createNotesBulk,
   getAllNotes,
+  getNoteById,
 };
