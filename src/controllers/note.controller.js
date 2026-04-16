@@ -48,6 +48,31 @@ async function createNote(req, res) {
   }
 }
 
+async function createNotesBulk(req, res) {
+  try {
+    const { notes } = req.body;
+
+    if (!Array.isArray(notes) || notes.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Notes array is required and cannot be empty",
+        data: null,
+      });
+    }
+
+    const createdNotes = await Note.insertMany(notes);
+
+    return res.status(201).json({
+      success: true,
+      message: `${createdNotes.length} notes created successfully`,
+      data: createdNotes,
+    });
+  } catch (error) {
+    return sendErrorResponse(res, 500, "Failed to create notes", error);
+  }
+}
+
 module.exports = {
   createNote,
+  createNotesBulk,
 };
