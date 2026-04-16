@@ -23,6 +23,10 @@ function isValidObjectId(id) {
   return mongoose.Types.ObjectId.isValid(id);
 }
 
+function hasOwnProperty(object, key) {
+  return Object.prototype.hasOwnProperty.call(object, key);
+}
+
 async function createNote(req, res) {
   try {
     const { title, content, category, isPinned } = req.body;
@@ -122,9 +126,63 @@ async function getNoteById(req, res) {
   }
 }
 
+async function replaceNote(req, res) {
+  try {
+    const { id } = req.params;
+
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid note ID",
+        data: null,
+      });
+    }
+
+    const { title, content, category, isPinned } = req.body;
+
+    if (!title || !content) {
+      return res.status(400).json({
+        success: false,
+        message: "Title and content are required",
+        data: null,
+      });
+    }
+
+    const replacement = {
+      title,
+      content,
+      category: hasOwnProperty(req.body, "category") ? category : "personal",
+      isPinned: hasOwnProperty(req.body, "isPinned") ? isPinned : false,
+    };
+
+    const note = await Note.findByIdAndUpdate(id, replacement, {
+      new: true,
+      overwrite: true,
+      runValidators: true,
+    });
+
+    if (!note) {
+      return res.status(404).json({
+        success: false,
+        message: "Note not found",
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Note replaced successfully",
+      data: note,
+    });
+  } catch (error) {
+    return sendErrorResponse(res, 500, "Failed to replace note", error);
+  }
+}
+
 module.exports = {
   createNote,
   createNotesBulk,
   getAllNotes,
   getNoteById,
+  replaceNote,
 };
