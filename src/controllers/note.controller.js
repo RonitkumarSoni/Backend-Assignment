@@ -29,7 +29,7 @@ function hasOwnProperty(object, key) {
 
 async function createNote(req, res) {
   try {
-    const { title, content, category, isPinned } = req.body;
+    const { title, content } = req.body;
 
     if (!title || !content) {
       return res.status(400).json({
@@ -39,20 +39,24 @@ async function createNote(req, res) {
       });
     }
 
-    const note = await Note.create({
-      title,
-      content,
-      category,
-      isPinned,
-    });
+    // Step 3 store db
+    const note = new Note(req.body);
+    await note.save();
 
+    // step 4 user response send
     return res.status(201).json({
       success: true,
-      message: "Note created successfully",
+      message: "Notes Created",
       data: note,
     });
-  } catch (error) {
-    return sendErrorResponse(res, 500, "Failed to create note", error);
+  }
+   catch (error) {
+    // use Error message send
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      data: null,
+    });
   }
 }
 
